@@ -1,5 +1,6 @@
 const path  = require("path");//nodejs核心模块
 const ESLintPlugin = require("eslint-webpack-plugin");
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 module.exports ={
     //入口
       entry:'./src/main.js',
@@ -77,12 +78,25 @@ module.exports ={
             //image name output
             filename: 'static/media/[hash:10][ext][query]'
           },
-          }
+          },
+          {
+            test: /\.m?js$/,
+            exclude: /node_modules/,
+            use: {
+              loader: 'babel-loader',
+              // options: {
+              //   presets: ['@babel/preset-env']
+              // }
+            }
+          },
         ],
     },
     plugins: [
       new ESLintPlugin({
          context: path.resolve(__dirname, "src"),
+      }),
+      new HtmlWebpackPlugin({
+       template:path.resolve(__dirname,'public/index.html') 
       }),
     ],
 
