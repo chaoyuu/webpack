@@ -1,4 +1,5 @@
 const path  = require("path");//nodejs核心模块
+const ESLintPlugin = require("eslint-webpack-plugin");
 module.exports ={
     //入口
       entry:'./src/main.js',
@@ -80,7 +81,9 @@ module.exports ={
         ],
     },
     plugins: [
-        //config
+      new ESLintPlugin({
+         context: path.resolve(__dirname, "src"),
+      }),
     ],
 
     //模式
