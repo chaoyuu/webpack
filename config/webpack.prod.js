@@ -1,9 +1,13 @@
 const path = require("path");//nodejs核心模块
+// nodejs核心模块，直接使用
+const os = require("os");
+// cpu核数
+const threads = os.cpus().length;
 const ESLintPlugin = require("eslint-webpack-plugin");
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
-
+const  TerserWebpackPlugin = require("terser-webpack-plugin");
 // 用来获取处理样式的loader
 function getStyleLoader(pre) {
   return [
@@ -37,71 +41,95 @@ module.exports = {
     rules: [
       //loader的配置
       {
-        test: /\.css$/,
-        use: getStyleLoader(),
+        oneOf: [
+          {
+            test: /\.css$/,
+            use: getStyleLoader(),
 
-      },
-      {
-        test: /\.less$/,
-        use: getStyleLoader('less-loader'),
-
-
-      },
-
-      {
-        test: /\.s[ac]ss$/,
-        use: getStyleLoader('sass-loader'),
-
-      },
+          },
+          {
+            test: /\.less$/,
+            use: getStyleLoader('less-loader'),
 
 
-      {
-        test: /\.styl$/,
-        use: getStyleLoader('stylus-loader'),
+          },
 
-      },
+          {
+            test: /\.s[ac]ss$/,
+            use: getStyleLoader('sass-loader'),
 
-      {
-        test: /\.(png|jpe?g|gif|webp|svg)$/,
-        type: 'asset',
-        parser: {
-          dataUrlCondition: {
-            maxSize: 10 * 1024 // 10kb
-          }
-        },
-        generator: {
-          //image name output
-          filename: 'static/images/[hash:10][ext][query]'
-        },
-      },
-      {
-        test: /\.(ttf|woff2?|mp3|mp4|avi)$/,
-        type: 'asset/resource',
-        parser: {
-          dataUrlCondition: {
-            maxSize: 10 * 1024 // 10kb
-          }
-        },
-        generator: {
-          //image name output
-          filename: 'static/media/[hash:10][ext][query]'
-        },
-      },
-      {
-        test: /\.m?js$/,
-        exclude: /node_modules/,
-        use: {
-          loader: 'babel-loader',
-          // options: {
-          //   presets: ['@babel/preset-env']
-          // }
-        }
-      },
+          },
+
+
+          {
+            test: /\.styl$/,
+            use: getStyleLoader('stylus-loader'),
+
+          },
+
+          {
+            test: /\.(png|jpe?g|gif|webp|svg)$/,
+            type: 'asset',
+            parser: {
+              dataUrlCondition: {
+                maxSize: 10 * 1024 // 10kb
+              }
+            },
+            generator: {
+              //image name output
+              filename: 'static/images/[hash:10][ext][query]'
+            },
+          },
+          {
+            test: /\.(ttf|woff2?|mp3|mp4|avi)$/,
+            type: 'asset/resource',
+            parser: {
+              dataUrlCondition: {
+                maxSize: 10 * 1024 // 10kb
+              }
+            },
+            generator: {
+              //image name output
+              filename: 'static/media/[hash:10][ext][query]'
+            },
+          },
+          {
+
+            test: /\.js$/,
+            // exclude: /node_modules/,//排除node_modules目录
+            include: path.resolve(__dirname, '../src'),//只处理src的文件
+
+            use: [
+              {
+              loader: 'thread-loader',//开启多进程
+              options:{
+                works:threads,
+              }
+              },
+              {
+                loader: 'babel-loader',
+                options: {
+                  // presets: ['@babel/preset-env'],
+                  cacheDirectory: true,//开启babel缓存
+                  cacheCompression: false,//关闭缓存文件压缩
+                }
+              }
+
+            ]
+          },
+        ]
+      }
     ],
   },
   plugins: [
     new ESLintPlugin({
       context: path.resolve(__dirname, "../src"),
+      exclude: "node_modules",
+      cache: true,
+      cacheLocation: path.resolve(__dirname, "../node_modules/.cache/eslintcache"),
+      threads,//开启多进程
+
+
     }),
     new HtmlWebpackPlugin({
       template: path.resolve(__dirname, '../public/index.html')
@@ -109,9 +137,20 @@ module.exports = {
     new MiniCssExtractPlugin({
       filename: "static/css/main.css",
     }),
-    new CssMinimizerPlugin(),
-
+    // new CssMinimizerPlugin(),
+    // new TerserWebpackPlugin({
+    //   parallel:threads,//多进程
+    // }),
   ],
+  optimization: {
+    //压缩的操作
+    minimizer:[
+      new CssMinimizerPlugin(),
+      new TerserWebpackPlugin({
+        parallel:threads,//多进程
+      }),
+    ]
+  },
   //模式
 
   mode: "production",

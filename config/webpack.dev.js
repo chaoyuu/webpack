@@ -1,4 +1,8 @@
 const path = require("path");//nodejs核心模块
+// nodejs核心模块，直接使用
+const os = require("os");
+// cpu核数
+const threads = os.cpus().length;
 const ESLintPlugin = require("eslint-webpack-plugin");
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 module.exports = {
@@ -15,7 +19,9 @@ module.exports = {
   //加载器
   module: {
     rules: [
-      //loader的配置
+       {
+        oneOf:[
+               //loader的配置
       {
         test: /\.css$/,
         use: ["style-loader", "css-loader"],
@@ -81,20 +87,42 @@ module.exports = {
         },
       },
       {
-        test: /\.m?js$/,
-        exclude: /node_modules/,
-        use: {
-          loader: 'babel-loader',
-          // options: {
-          //   presets: ['@babel/preset-env']
-          // }
-        }
+        test: /\.js$/,
+        // exclude: /node_modules/,//排除node_modules目录
+          include: path.resolve(__dirname,'../src'),//只处理src的文件
+          use: [
+            {
+            loader: 'thread-loader',//开启多进程
+            options:{
+              works:threads,
+            }
+            },
+            {
+              loader: 'babel-loader',
+              options: {
+                // presets: ['@babel/preset-env'],
+                cacheDirectory: true,//开启babel缓存
+                cacheCompression: false,//关闭缓存文件压缩
+              }
+            }
+
+          ]
+        
+
       },
+        ]
+       },
     ],
   },
+  //插件
   plugins: [
     new ESLintPlugin({
       context: path.resolve(__dirname, "../src"),
+      exclude:"node_modules",
+      cache: true,
+      cacheLocation: path.resolve(__dirname, "../node_modules/.cache/eslintcache"),
+      threads,//开启多进程
+
     }),
     new HtmlWebpackPlugin({
       template: path.resolve(__dirname, '../public/index.html')
