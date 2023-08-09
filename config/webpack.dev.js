@@ -40,7 +40,7 @@ module.exports = {
       {
         test: /\.s[ac]ss$/,
         use: [
-          // compiles Less to CSS
+       
           'style-loader',
           'css-loader',
           'sass-loader',
@@ -52,7 +52,7 @@ module.exports = {
       {
         test: /\.styl$/,
         use: [
-          // compiles Less to CSS
+
           'style-loader',
           'css-loader',
           'stylus-loader',
@@ -103,6 +103,7 @@ module.exports = {
                 // presets: ['@babel/preset-env'],
                 cacheDirectory: true,//开启babel缓存
                 cacheCompression: false,//关闭缓存文件压缩
+                plugins: ["@babel/plugin-transform-runtime"], // 减少代码体积
               }
             }
 
