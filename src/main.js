@@ -8,6 +8,10 @@ import "./sass/index.scss";
 import "./stylus/index.styl";
 import "./css/iconfont.css";
 
-const result = count(2,1);
+const result = count(2,2);
 console.log(result);
 console.log(sum(1,2,3,4));
+
+if( module.hot) {
+    module.hot.accept("./js/count.js");
+}
