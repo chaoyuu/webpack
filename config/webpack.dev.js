@@ -12,8 +12,12 @@ module.exports = {
   output: {
     // path: path.resolve(__dirname, "../dist"),//绝对路径
     path:undefined,//给webpack-dev-server使用
-    filename: "static/js/main.js",
+    filename: "static/js/[name].js",
+    chunkFilename: "static/js/[name].chunk.js",
+    //图片，字体通过type
+    assetModuleFilename:"static/media/[hash:10][ext][query]",
     // clean: true,//自动清空打包内容
+  
   },
 
   //加载器
@@ -68,10 +72,10 @@ module.exports = {
             maxSize: 10 * 1024 // 10kb
           }
         },
-        generator: {
-          //image name output
-          filename: 'static/images/[hash:10][ext][query]'
-        },
+        // generator: {
+        //   //image name output
+        //   filename: 'static/images/[hash:10][ext][query]'
+        // },
       },
       {
         test: /\.(ttf|woff2?|mp3|mp4|avi)$/,
@@ -81,10 +85,10 @@ module.exports = {
             maxSize: 10 * 1024 // 10kb
           }
         },
-        generator: {
-          //image name output
-          filename: 'static/media/[hash:10][ext][query]'
-        },
+        // generator: {
+        //   //image name output
+        //   filename: 'static/media/[hash:10][ext][query]'
+        // },
       },
       {
         test: /\.js$/,
